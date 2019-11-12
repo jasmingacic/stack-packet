@@ -11,7 +11,6 @@ import (
 func TestNewClient(t *testing.T) {
 	testClient := packngo.NewClientWithAuth("crossplane", "api-token", nil)
 	type want struct {
-		err error
 		res *packngo.Client
 	}
 	tests := []struct {
