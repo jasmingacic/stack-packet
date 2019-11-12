@@ -14,24 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package clients
+package test
 
 import (
-	"context"
-	"net/http"
-
-	"github.com/packethost/packngo"
+	"github.com/google/go-cmp/cmp"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-// NewClient ... TODO
-func NewClient(ctx context.Context, credentials []byte) *packngo.Client {
-	return packngo.NewClientWithAuth("crossplane", string(credentials), nil)
-}
-
-// IsNotFound returns true if error is not found
-func IsNotFound(err error) bool {
-	if e, ok := err.(*packngo.ErrorResponse); ok {
-		return e.Response.StatusCode == http.StatusNotFound
-	}
-	return false
+// EquateQuantities returns true if the supplied quantities produce identical
+// values.
+func EquateQuantities() cmp.Option {
+	return cmp.Comparer(func(a, b resource.Quantity) bool {
+		return a.Value() == b.Value()
+	})
 }

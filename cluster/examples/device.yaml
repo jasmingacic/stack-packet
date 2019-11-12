@@ -1,16 +1,18 @@
 apiVersion: server.packet.crossplane.io/v1alpha1
 kind: Device
 metadata:
-  name: mydevice
+  name: devicea
   namespace: app-project1-dev
 spec:
-  projectID: ${PROJECT_ID}
-  hostname: packet.crossplane.io
-  plan: t1.small.x86
-  facility: sjc1
-  operatingSystem: coreos_stable
-  billingCycle: hourly
+  forProvider:
+    projectID: 93125c2a-8b78-4d4f-a3c4-7367d6b7cca8
+    hostname: crossplane
+    plan: c1.small.x86
+    facility: any
+    locked: false
+    operatingSystem: centos_7
+    billingCycle: hourly
+    hardware_reservation_id: next_available
   providerRef:
-    name: example
-    namespace: packet-infra-dev
+    name: example-provider-packet
   reclaimPolicy: Delete

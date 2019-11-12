@@ -14,24 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package clients
-
-import (
-	"context"
-	"net/http"
-
-	"github.com/packethost/packngo"
-)
-
-// NewClient ... TODO
-func NewClient(ctx context.Context, credentials []byte) *packngo.Client {
-	return packngo.NewClientWithAuth("crossplane", string(credentials), nil)
-}
-
-// IsNotFound returns true if error is not found
-func IsNotFound(err error) bool {
-	if e, ok := err.(*packngo.ErrorResponse); ok {
-		return e.Response.StatusCode == http.StatusNotFound
-	}
-	return false
-}
+package controller

@@ -18,10 +18,11 @@ package device
 
 import (
 	"context"
+	"reflect"
 
-	"github.com/hasheddan/stack-packet-demo/api/server/v1alpha1"
-	"github.com/hasheddan/stack-packet-demo/pkg/clients"
 	"github.com/packethost/packngo"
+	"github.com/packethost/stack-packet/apis/server/v1alpha1"
+	"github.com/packethost/stack-packet/pkg/clients"
 )
 
 // NewClient ... TODO
@@ -31,21 +32,55 @@ func NewClient(ctx context.Context, credentials []byte) (packngo.DeviceService, 
 	return client.Devices, nil
 }
 
-// CreateFromDevice ... TODO
+// CreateFromDevice return packngo.DeviceCreateRequest created from Kubernetes
 func CreateFromDevice(d *v1alpha1.Device) *packngo.DeviceCreateRequest {
 	return &packngo.DeviceCreateRequest{
-		HostName:     d.Spec.Hostname,
-		Plan:         d.Spec.Plan,
-		Facility:     d.Spec.Facility,
-		OS:           d.Spec.OS,
-		BillingCycle: d.Spec.BillingCycle,
-		ProjectID:    d.Spec.ProjectID,
-		UserData:     d.Spec.UserData,
-		Tags:         d.Spec.Tags,
+		Hostname:     d.Spec.ForProvider.Hostname,
+		Plan:         d.Spec.ForProvider.Plan,
+		Facility:     []string{d.Spec.ForProvider.Facility},
+		OS:           d.Spec.ForProvider.OS,
+		BillingCycle: d.Spec.ForProvider.BillingCycle,
+		ProjectID:    d.Spec.ForProvider.ProjectID,
+		UserData:     d.Spec.ForProvider.UserData,
+		Tags:         d.Spec.ForProvider.Tags,
 	}
 }
 
-// NeedsUpdate ... TODO
-func NeedsUpdate(d *v1alpha1.Device, p *packngo.Device) bool {
-	return false
+// IsUpToDate returns true if the supplied Kubernetes resource does not differ from the
+// supplied Packet resource. It considers only fields that can be modified in
+// place without deleting and recreating the instance.
+func IsUpToDate(d *v1alpha1.Device, p *packngo.Device) bool {
+	if d.Spec.ForProvider.Hostname != p.Hostname {
+		return false
+	}
+	if d.Spec.ForProvider.Locked != p.Locked {
+		return false
+	}
+	if d.Spec.ForProvider.UserData != p.UserData {
+		return false
+	}
+	if d.Spec.ForProvider.IPXEScriptURL != p.IPXEScriptURL {
+		return false
+	}
+	if d.Spec.ForProvider.AlwaysPXE != p.AlwaysPXE {
+		return false
+	}
+	if !reflect.DeepEqual(d.Spec.ForProvider.Tags, p.Tags) {
+		return false
+	}
+
+	return true
+}
+
+// NewUpdateDeviceRequest creates a request to update an instance suitable for
+// use with the Packet API.
+func NewUpdateDeviceRequest(d *v1alpha1.Device) *packngo.DeviceUpdateRequest {
+	return &packngo.DeviceUpdateRequest{
+		Hostname:      &d.Spec.ForProvider.Hostname,
+		Locked:        &d.Spec.ForProvider.Locked,
+		UserData:      &d.Spec.ForProvider.UserData,
+		IPXEScriptURL: &d.Spec.ForProvider.IPXEScriptURL,
+		AlwaysPXE:     &d.Spec.ForProvider.AlwaysPXE,
+		Tags:          &d.Spec.ForProvider.Tags,
+	}
 }
